@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  INDRA serverless alerting. A scheduled Lambda scores flood / drought / heat risk for every district
+  people subscribe to, stores new alerts in DynamoDB and fans them out through SNS.
+  Runs locally with `sam local` + LocalStack - no AWS account needed.
+
+Parameters:
+  SubscriptionsTableName:
+    Type: String
+    Default: IndraSubscriptions
+  AlertsTableName:
+    Type: String
+    Default: IndraAlerts
+  EvaluationSchedule:
+    Type: String
+    Default: rate(3 hours)
+    Description: How often to re-evaluate subscribed districts.
+  SesSender:
+    Type: String
+    Default: ""
+    Description: Verified SES address used for email alerts (leave empty to skip email delivery).
+  ForecastEnabled:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [arm64]
+    Timeout: 120
+    MemorySize: 256
+    Tracing: PassThrough
+
+Resources:
+  # Same layout the FastAPI backend (backend/indra/services/stores.py) reads and writes.
+  SubscriptionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref SubscriptionsTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: userId, AttributeType: S }
+        - { AttributeName: subId, AttributeType: S }
+        - { AttributeName: districtKey, AttributeType: S }
+      KeySchema:
+        - { AttributeName: userId, KeyType: HASH }
+        - { AttributeName: subId, KeyType: RANGE }
+      GlobalSecondaryIndexes:
+        - IndexName: ByDistrict
+          KeySchema:
+            - { AttributeName: districtKey, KeyType: HASH }
+            - { AttributeName: subId, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
+
+  AlertsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref AlertsTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: districtKey, AttributeType: S }
+        - { AttributeName: ts, AttributeType: S }
+      KeySchema:
+        - { AttributeName: districtKey, KeyType: HASH }
+        - { AttributeName: ts, KeyType: RANGE }
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: indra-alerts
+      DisplayName: INDRA weather and water alerts
+
+  RiskEvaluatorFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: functions/risk_evaluator/
+      Handler: app.handler
+      Description: Scores flood/drought/heat risk for subscribed districts and publishes new alerts.
+      Environment:
+        Variables:
+          SUBSCRIPTIONS_TABLE: !Ref SubscriptionsTable
+          ALERTS_TABLE: !Ref AlertsTable
+          ALERT_TOPIC_ARN: !Ref AlertTopic
+          FORECAST_ENABLED: !Ref ForecastEnabled
+          SES_SENDER: !Ref SesSender
+      Policies:
+        - DynamoDBReadPolicy: { TableName: !Ref SubscriptionsTable }    # includes the ByDistrict index
+        - DynamoDBCrudPolicy: { TableName: !Ref AlertsTable }
+        - SNSPublishMessagePolicy: { TopicName: !GetAtt AlertTopic.TopicName }
+        - Statement:
+            - Effect: Allow
+              Action: [ses:SendEmail]
+              Resource: "*"
+            - Effect: Allow
+              Action: [sns:Publish]               # direct-to-phone SMS
+              Resource: "*"
+      Events:
+        Schedule:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: !Ref EvaluationSchedule
+            Description: Periodic district risk evaluation
+
+Outputs:
+  AlertTopicArn:
+    Value: !Ref AlertTopic
+  RiskEvaluatorFunctionArn:
+    Value: !GetAtt RiskEvaluatorFunction.Arn

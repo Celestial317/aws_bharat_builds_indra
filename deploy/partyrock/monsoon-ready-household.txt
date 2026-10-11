@@ -1,0 +1,41 @@
+PARTYROCK APP BLUEPRINT - "Monsoon-Ready Household"
+Create at https://partyrock.aws  (free, no AWS account or card needed) -> "Build your own app" -> paste the app prompt.
+
+APP PROMPT (paste into the generator)
+-------------------------------------
+Build a household flood-preparedness planner for India. The user enters a district or town, their roof
+area in square metres, how many people live in the home, and whether they have a rainwater tank.
+Show: (1) a 7-day monsoon prep checklist, (2) how much rainwater their roof will shed in a 100 mm
+cloudburst (area x depth x 0.8 runoff, in litres) and where that water should go so the street does not
+flood, (3) a short "what to do when the street floods" safety card, and (4) a chat box to ask follow-ups.
+
+WIDGETS (if you prefer to build by hand)
+----------------------------------------
+User Input   "District"            placeholder: Pune
+User Input   "Roof area (sq m)"    placeholder: 100
+User Input   "People at home"      placeholder: 4
+User Input   "Do you have a tank?" placeholder: no
+
+Text         "Cloudburst volume"
+  Prompt: Using a roof area of @Roof area (sq m) square metres and a 100 mm cloudburst, compute litres
+  shed = area x 100 x 0.8. Explain in two sentences what that volume means for @District and the street
+  outside (compare it with a tanker truck of 10,000 litres). Show the arithmetic.
+
+Text         "7-day prep checklist"
+  Prompt: Write a 7-day pre-monsoon checklist for a household of @People at home in @District who
+  answered "@Do you have a tank?" to having a rainwater tank. Cover gutters, first-flush diverter,
+  overflow to a recharge pit, electrical safety, stored drinking water (3 L per person per day for 5
+  days), documents and medicines. Keep each day to one line.
+
+Text         "Street flooding safety card"
+  Prompt: A short, calm safety card for when water enters the street in @District: what to switch
+  off, where to move valuables, which numbers to call (national emergency 112), and what not to do.
+
+Chatbot      "Ask INDRA"
+  Prompt: You are a practical rainwater-harvesting and flood-preparedness assistant for Indian
+  households. The user lives in @District with a roof of @Roof area (sq m) square metres.
+  Answer in under 90 words, no emoji, and say when you are unsure.
+
+NOTE: PartyRock is a hosted AWS playground and cannot be self-hosted or called from code. INDRA's
+production assistant is the Strands agent in backend/indra/ai/agents.py, which uses real tools
+(climate engine, RWH sizing, document search) instead of prompt-only widgets.

@@ -1,0 +1,20 @@
+# EKS Anywhere / EKS Distro overlay: images from a local registry, public origin for CORS + ingress.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - { name: indra/backend, newName: localhost:5000/indra/backend, newTag: "2.0.0" }
+  - { name: indra/frontend, newName: localhost:5000/indra/frontend, newTag: "2.0.0" }
+  - { name: indra/telemetry, newName: localhost:5000/indra/telemetry, newTag: "2.0.0" }
+patches:
+  - target: { kind: ConfigMap, name: indra-config }
+    patch: |-
+      - op: replace
+        path: /data/CORS_ORIGINS
+        value: http://indra.localtest.me
+  - target: { kind: Ingress, name: indra }
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: indra.localtest.me

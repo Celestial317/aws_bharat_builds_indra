@@ -1,0 +1,62 @@
+{
+ "guide": {
+  "title": "DIY Rainwater Harvesting System Installation",
+  "steps": [
+   "**Step 1: Planning & Assessment**\n- Calculate roof catchment area (length × width)\n- Determine annual rainfall in your area\n- Estimate water harvesting potential: Area (m²) × Rainfall (mm) × 0.8 (efficiency)\n- Choose appropriate tank size based on needs and space",
+   "**Step 2: Gutter Installation**\n- Install gutters along roof edges with 1-2° slope toward downspout\n- Ensure gutters are clean and free from debris\n- Secure gutters every 1-1.5 meters with brackets\n- Seal all joints to prevent leakage",
+   "**Step 3: First Flush System**\n- Install first flush diverter near the downspout\n- This diverts the initial dirty water (first 5mm of rain)\n- Use a 4\" PVC pipe as diverter chamber\n- Install a small ball valve at the bottom for cleaning",
+   "**Step 4: Filtration Setup**\n- Install mesh screen/leaf guard at gutter entry points\n- Add second-stage filter before tank inlet\n- Use 1-2mm mesh for effective filtration\n- Ensure easy access for periodic cleaning",
+   "**Step 5: Tank Installation**\n- Place tank on stable, level platform (elevated if possible)\n- Keep away from direct sunlight (use covered area)\n- Install inlet pipe at top with mosquito mesh\n- Install overflow pipe near the top of the tank\n- Add outlet tap/valve at bottom (10cm from base)",
+   "**Step 6: Pipe Connections**\n- Connect downspout to first flush diverter\n- Connect diverter outlet to filter system\n- Connect filtered water line to tank inlet\n- Install overflow pipe directing excess water to drainage or garden\n- Use appropriate slopes (minimum 1:100) for gravity flow",
+   "**Step 7: Tank Preparation**\n- Clean tank thoroughly before first use\n- Cover tank top with tight-fitting lid\n- Ensure all openings have mosquito mesh\n- Mark water level indicator on tank exterior",
+   "**Step 8: Testing & Commissioning**\n- Test system with water hose before first rain\n- Check all connections for leaks\n- Verify first flush diverter operation\n- Ensure overflow functions correctly\n- Clean gutters and filters",
+   "**Step 9: Maintenance Schedule**\n- **Weekly (monsoon season)**: Check gutters and filters\n- **Monthly**: Clean first flush system, inspect pipes\n- **Quarterly**: Deep clean filters, check tank water quality\n- **Annually**: Full system inspection, tank cleaning, seal check",
+   "**Step 10: Water Treatment (Optional)**\n- For potable use: Add chlorine tablets or install UV filter\n- For gardening: Use as-is after basic filtration\n- For household use (non-potable): Ensure proper filtration\n- Test water quality periodically"
+  ],
+  "materials_needed": [
+   "PVC pipes (various diameters: 3\", 4\", 6\")",
+   "Storage tank (500L - 2000L capacity)",
+   "First flush diverter",
+   "Mesh filter/leaf guard",
+   "Gutter system (if not present)",
+   "Downspout pipes",
+   "Overflow pipe",
+   "Tap/valve for water outlet",
+   "PVC adhesive and primer",
+   "Mesh screen (for tank inlet)",
+   "Basic tools: hacksaw, measuring tape, drill, spirit level"
+  ],
+  "difficulty": "Intermediate",
+  "estimated_time": "2-3 days",
+  "estimated_cost": "₹15,000 - ₹30,000"
+ },
+ "tips": {
+  "cost_saving_tips": [
+   "Buy materials during off-season (summer) for better prices",
+   "Consider used/recycled tanks if in good condition",
+   "Group purchase with neighbors for bulk discounts",
+   "Start with basic system, upgrade gradually"
+  ],
+  "common_mistakes": [
+   "Not installing first flush - leads to tank contamination",
+   "Insufficient slope in pipes - causes water stagnation",
+   "Undersized gutters - overflow during heavy rain",
+   "No mosquito mesh - breeding ground for mosquitoes",
+   "Tank in direct sunlight - promotes algae growth"
+  ],
+  "safety_tips": [
+   "Work with partner when on roof",
+   "Use proper ladder and safety harness",
+   "Turn off electricity in work area",
+   "Wear gloves when handling PVC adhesive",
+   "Ensure tank platform can support full weight (1L = 1kg)"
+  ],
+  "optimization_tips": [
+   "Paint tank white to reflect heat",
+   "Add multiple taps at different heights",
+   "Install water level indicator for monitoring",
+   "Use diversion valve to switch between storage and drainage",
+   "Connect multiple tanks in series for larger capacity"
+  ]
+ }
+}

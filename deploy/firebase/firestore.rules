@@ -1,0 +1,36 @@
+rules_version = '2';
+// Publish in Firebase console > Firestore Database > Rules (project indra-164b4), or:
+//   firebase deploy --only firestore:rules
+// Until these are published, INDRA still works: profiles and assessments fall back to this device.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Profiles: readable by signed-in droplets (nearby-droplet discovery), writable only by the owner.
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, update, delete: if isOwner(uid);
+    }
+
+    // Assessments are private to their owner.
+    match /assessments/{id} {
+      allow read, delete, update: if signedIn() && resource.data.userId == request.auth.uid;
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Community feed: any droplet can read and post as themselves; reactions/counters may be updated by anyone signed in.
+    match /community_posts/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.authorUid == request.auth.uid;
+      allow update: if signedIn();
+      allow delete: if signedIn() && resource.data.authorUid == request.auth.uid;
+    }
+    match /post_comments/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.authorUid == request.auth.uid;
+      allow update: if signedIn();
+      allow delete: if signedIn() && resource.data.authorUid == request.auth.uid;
+    }
+  }
+}

@@ -1,0 +1,49 @@
+# --- secrets (never commit)
+.env
+.env.*
+!.env.example
+*service-account*.json
+*.pem
+*.key
+
+# --- python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- node
+node_modules/
+frontend/dist/
+*.log
+
+# --- java
+services/telemetry/out/
+services/telemetry/data/
+
+# --- aws sam
+.aws-sam/
+serverless/.aws-sam/
+
+# --- data: raw survey stays local; derived artifacts ARE committed
+data/raw/
+data/runtime/
+# embedding model weights (downloaded on first run / baked into the image)
+backend/models/
+
+# --- firecracker build outputs
+deploy/firecracker/rootfs.ext4
+deploy/firecracker/vmlinux
+
+# --- editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "indra-climate"
+version = "1.0.0"
+description = "INDRA climate-risk engine: flood / drought / heat scoring, water balance and alerts. Pure standard library."
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools.packages.find]
+include = ["indra_climate*"]
+
+[tool.setuptools.package-data]
+indra_climate = ["data/*.json", "data/*.csv.gz"]

@@ -1,0 +1,106 @@
+# INDRA full stack. Works with Finch (open source, no Docker Desktop licence) or Docker:
+#   finch compose up --build            # app + OpenSearch
+#   finch compose --profile aws up      # ...plus LocalStack (DynamoDB/SNS/Lambda) for the alert pipeline
+# Then open http://localhost:8080  (API docs: http://localhost:8000/docs)
+name: indra
+
+x-backend-env: &backend-env
+  INDRA_ENV: development
+  AUTH_MODE: demo                      # local only. Use AUTH_MODE=firebase (and INDRA_ENV=production) when deploying.
+  CORS_ORIGINS: http://localhost:8080,http://localhost:5173
+  OPENSEARCH_URL: http://opensearch:9200
+  TELEMETRY_URL: http://telemetry:8090
+  TELEMETRY_SERVICE_KEY: ${TELEMETRY_SERVICE_KEY:-dev-service-key}
+  LLM_API_KEY: ${LLM_API_KEY:-${OPENROUTER_API_KEY:-}}
+  LLM_BASE_URL: ${LLM_BASE_URL:-https://openrouter.ai/api/v1}
+  LLM_MODEL: ${LLM_MODEL:-nvidia/nemotron-nano-12b-v2-vl:free}
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: indra/frontend:dev
+    ports: ["8080:8080"]
+    depends_on: [backend]
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: indra/backend:dev
+    ports: ["8000:8000"]
+    environment:
+      <<: *backend-env
+    depends_on:
+      telemetry: { condition: service_healthy }
+      opensearch: { condition: service_healthy }
+
+  telemetry:
+    build: services/telemetry
+    image: indra/telemetry:dev
+    ports: ["8090:8090"]
+    environment:
+      TELEMETRY_SERVICE_KEY: ${TELEMETRY_SERVICE_KEY:-dev-service-key}
+    volumes: ["telemetry-data:/data"]
+    healthcheck:
+      test: ["CMD", "java", "-cp", "/app", "org.indra.telemetry.HealthProbe"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  opensearch:
+    image: opensearchproject/opensearch:2.17.1
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"          # dev only
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ports: ["9200:9200"]
+    volumes: ["opensearch-data:/usr/share/opensearch/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  # One-shot: embed the PDFs in data/knowledge into OpenSearch.   finch compose run --rm ingest
+  ingest:
+    profiles: [tools]
+    image: indra/backend:dev
+    user: "0"
+    working_dir: /work
+    command: ["python", "scripts/ingest_knowledge.py"]
+    environment:
+      <<: *backend-env
+      PYTHONPATH: /app/backend:/work
+    volumes: ["./scripts:/work/scripts:ro", "./data/knowledge:/work/data/knowledge:ro"]
+    depends_on:
+      opensearch: { condition: service_healthy }
+
+  localstack:
+    profiles: [aws]
+    image: localstack/localstack:3
+    environment:
+      SERVICES: dynamodb,sns,lambda,events,sqs
+    ports: ["4566:4566"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4566/_localstack/health | grep -q running"]
+      interval: 10s
+      retries: 20
+
+  # One-shot: create the DynamoDB tables + SNS topic from serverless/template.yaml, then fire a demo storm.
+  aws-bootstrap:
+    profiles: [aws]
+    image: indra/backend:dev
+    user: "0"
+    working_dir: /work
+    command: ["python", "scripts/localstack_bootstrap.py", "--endpoint", "http://localstack:4566", "--demo"]
+    environment: { PYTHONPATH: "/app/backend:/work" }
+    volumes: ["./scripts:/work/scripts:ro", "./serverless:/work/serverless:ro", "./packages:/work/packages:ro"]
+    depends_on:
+      localstack: { condition: service_healthy }
+
+volumes:
+  telemetry-data:
+  opensearch-data:

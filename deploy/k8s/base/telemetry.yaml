@@ -1,0 +1,61 @@
+# Single replica by design: tank state lives in memory with an on-disk snapshot on the PVC.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: telemetry
+  namespace: indra
+  labels: { app.kubernetes.io/name: telemetry, app.kubernetes.io/part-of: indra }
+spec:
+  serviceName: telemetry
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: telemetry }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: telemetry, app.kubernetes.io/part-of: indra }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: telemetry
+          image: indra/telemetry:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8090 }]
+          env:
+            - { name: INDRA_ENV, value: production }
+            - name: TELEMETRY_SERVICE_KEY
+              valueFrom: { secretKeyRef: { name: indra-secrets, key: TELEMETRY_SERVICE_KEY } }
+          resources:
+            requests: { cpu: 50m, memory: 192Mi }
+            limits: { cpu: 500m, memory: 384Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 20
+          volumeMounts:
+            - { name: data, mountPath: /data }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telemetry
+  namespace: indra
+spec:
+  selector: { app.kubernetes.io/name: telemetry }
+  ports: [{ name: http, port: 8090, targetPort: http }]

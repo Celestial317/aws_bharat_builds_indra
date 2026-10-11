@@ -1,0 +1,36 @@
+PARTYROCK APP BLUEPRINT - "Heatwave Water Budget"
+Create at https://partyrock.aws  (free, no AWS account or card needed).
+
+APP PROMPT (paste into the generator)
+-------------------------------------
+Build a summer water-budget planner for Indian villages. The user enters their district, number of
+people, number of cattle, acres of crops, and the forecast peak temperature. Show a daily water
+budget in buckets (1 bucket = 20 litres) split between drinking, cattle and irrigation, how it changes
+on a heatwave day (above 43 deg C people and cattle need roughly 25-35% more), a list of the five
+cheapest ways to cut evaporation losses, and a Hindi/English chat helper.
+
+WIDGETS (if you prefer to build by hand)
+----------------------------------------
+User Input   "District"
+User Input   "People"
+User Input   "Cattle"
+User Input   "Acres of crops"
+User Input   "Forecast peak temperature (deg C)"
+
+Text         "Daily water budget"
+  Prompt: For @People people, @Cattle cattle and @Acres of crops acres in @District with a forecast
+  peak of @Forecast peak temperature (deg C) deg C, give a daily budget in buckets of 20 litres for
+  drinking (2 buckets per person), cattle (2 per animal) and irrigation (10 per acre), then apply a
+  heat uplift if the peak is above 40 deg C. Present it as a small table and a one-line verdict.
+
+Text         "Cut the losses"
+  Prompt: List the five cheapest ways a village in @District can cut water loss to evaporation and
+  seepage during a heatwave (mulching, covering tanks, dawn irrigation, pond shading, drip). One line
+  each with a rough cost in rupees.
+
+Chatbot      "Jal Sahayak"
+  Prompt: You are a friendly water advisor for farmers. Reply in the language the user writes in
+  (Hindi, Hinglish or English), in under 80 words, with practical steps. Say when you are unsure.
+
+NOTE: PartyRock is a hosted AWS playground and cannot be self-hosted or called from code. The same
+budgeting logic runs for real in backend/indra/routers/water.py (INDRA-Gramin).

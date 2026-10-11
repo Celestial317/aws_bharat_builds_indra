@@ -1,0 +1,34 @@
+# EKS Anywhere on the Docker provider: a real EKS Distro Kubernetes cluster on one machine, free.
+#   eksctl anywhere create cluster -f deploy/eks-anywhere/cluster-docker.yaml
+# Set kubernetesVersion to one your installed `eksctl anywhere` release supports (see its release notes).
+apiVersion: anywhere.eks.amazonaws.com/v1alpha1
+kind: Cluster
+metadata:
+  name: indra-dev
+spec:
+  clusterNetwork:
+    cniConfig:
+      cilium: {}
+    pods:
+      cidrBlocks: [192.168.0.0/16]
+    services:
+      cidrBlocks: [10.96.0.0/12]
+  controlPlaneConfiguration:
+    count: 1
+  datacenterRef:
+    kind: DockerDatacenterConfig
+    name: indra-dev
+  externalEtcdConfiguration:
+    count: 1
+  kubernetesVersion: "1.31"
+  managementCluster:
+    name: indra-dev
+  workerNodeGroupConfigurations:
+    - count: 2
+      name: md-0
+---
+apiVersion: anywhere.eks.amazonaws.com/v1alpha1
+kind: DockerDatacenterConfig
+metadata:
+  name: indra-dev
+spec: {}

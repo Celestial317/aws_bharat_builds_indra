@@ -1,0 +1,27 @@
+# INDRA backend runtime dependencies. Run from backend/:  pip install -r requirements.txt
+../packages/indra_climate
+
+# --- web framework
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+pydantic>=2.7,<3
+python-dotenv>=1.0
+httpx>=0.27,<1
+beautifulsoup4>=4.12
+
+# --- AI: Strands Agents SDK (agent loop + tools), OpenAI-compatible model provider
+strands-agents[openai]>=1.0
+
+# --- RAG: OpenSearch k-NN vector store, local MiniLM embeddings, PDF ingestion
+opensearch-py>=2.6,<4
+sentence-transformers>=3.0
+pypdf>=4.0
+numpy>=1.26
+scikit-learn>=1.4
+
+# --- authz + auth: Cedar policy engine, Firebase ID-token verification
+cedarpy>=4.1
+firebase-admin>=6.5
+
+# --- AWS-compatible storage (DynamoDB on LocalStack or AWS)
+boto3>=1.34

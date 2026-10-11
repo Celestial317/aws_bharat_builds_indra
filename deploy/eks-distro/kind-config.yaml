@@ -1,0 +1,19 @@
+# EKS Distro (the Kubernetes build EKS itself runs) inside kind. Pick a node image from
+#   https://gallery.ecr.aws/eks-distro/kubernetes-sigs/kind/node
+# and create the cluster with:
+#   kind create cluster --config deploy/eks-distro/kind-config.yaml --image <that image>
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: indra
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      - { containerPort: 80, hostPort: 80, protocol: TCP }
+      - { containerPort: 443, hostPort: 443, protocol: TCP }
+  - role: worker
