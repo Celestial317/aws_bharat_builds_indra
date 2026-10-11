@@ -213,7 +213,4 @@ persist telemetry in DynamoDB/Timestream for multi-replica; per-user alert deliv
 
 ## Developed by
 
-Soumya Sourav Das
-Sudhanshu Shekhar
-Palak Jain
-Suravi Jha
+Soumya Sourav Das | Sudhanshu Shekhar | Palak Jain | Suravi Jha
