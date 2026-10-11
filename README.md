@@ -209,3 +209,11 @@ offline.
 Run the containers, SAM and Firecracker paths on a machine that has the tools (see the honesty note); add OCR for scanned PDFs;
 persist telemetry in DynamoDB/Timestream for multi-replica; per-user alert delivery needs a verified SES sender
 (`SES_SENDER`) and, for SMS, an SNS-enabled account.
+
+
+## Developed by
+
+Soumya Sourav Das
+Sudhanshu Shekhar
+Palak Jain
+Suravi Jha
